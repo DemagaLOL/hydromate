@@ -8,7 +8,7 @@ HydroMate adalah aplikasi Android untuk mahasiswa. Pengingat minumnya otomatis m
 
 ## 1. Nama Tim dan Daftar Anggota
 
-**Nama tim:** [Nama Tim]
+**Nama tim:** katawendrapasrahaja
 
 | No | Nama | Peran |
 |----|------|-------|
