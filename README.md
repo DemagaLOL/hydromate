@@ -12,11 +12,11 @@ HydroMate adalah aplikasi Android untuk mahasiswa. Pengingat minumnya otomatis m
 
 | No | Nama | Peran |
 |----|------|-------|
-| 1  | [Danawendra Girinandana] | Ketua |
-| 2  | [[Raflyanno Kautsar Wibowo]] | Anggota |
-| 3  | [Noval Rangga Nandika] | Anggota |
-| 4  | [Devania Dwi Cantika] | Anggota |
-| 5  | [Pradipta Bayuaji] | Anggota |
+| 1  | Danawendra Girinandana | Ketua |
+| 2  | Raflyanno Kautsar Wibowo | Anggota |
+| 3  | Noval Rangga Nandika | Anggota |
+| 4  | Devania Dwi Cantika | Anggota |
+| 5  | Pradipta Bayuaji | Anggota |
 
 ---
 
