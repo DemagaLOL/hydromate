@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Untuk tile peta OpenStreetMap dan cuaca Open-Meteo -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="hydromate_flutt"
+        android:label="HydroMate"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
