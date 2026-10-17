@@ -11,8 +11,8 @@ class PomodoroTimer extends ChangeNotifier {
     this.durasiFokus = const Duration(minutes: 25),
     this.durasiIstirahat = const Duration(minutes: 5),
     DateTime Function()? jam,
-  })  : _jam = jam ?? DateTime.now,
-        sisa = durasiFokus;
+  }) : _jam = jam ?? DateTime.now,
+       sisa = durasiFokus;
 
   Duration durasiFokus;
   Duration durasiIstirahat;
@@ -22,6 +22,14 @@ class PomodoroTimer extends ChangeNotifier {
   Duration sisa;
   int sesiSelesai = 0;
 
+  // Tugas yang sedang dikerjakan (ditampilkan di halaman fokus)
+  String tugas = 'Mengerjakan tugas kuliah';
+
+  void aturTugas(String t) {
+    tugas = t;
+    notifyListeners();
+  }
+
   // Dipanggil setiap kali fase berganti (untuk getar, sheet istirahat, dll.)
   void Function(FasePomodoro faseBaru)? onFaseBerubah;
 
@@ -29,6 +37,9 @@ class PomodoroTimer extends ChangeNotifier {
   Timer? _ticker;
 
   bool get berjalan => _berakhirPada != null;
+
+  // Waktu fase saat ini berakhir, null bila timer tidak berjalan
+  DateTime? get berakhirPada => _berakhirPada;
 
   Duration get durasiFase =>
       fase == FasePomodoro.fokus ? durasiFokus : durasiIstirahat;

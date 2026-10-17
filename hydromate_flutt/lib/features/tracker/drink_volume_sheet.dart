@@ -40,8 +40,10 @@ class _DrinkVolumeSheetState extends State<DrinkVolumeSheet> {
   // Bulatkan ke kelipatan 50, getar halus tiap kali berpindah kelipatan
   void _ubahMl(double mentah) {
     _mlMentah = mentah.clamp(_minMl.toDouble(), _maxMl.toDouble());
-    final dibulatkan =
-        ((_mlMentah / _langkah).round() * _langkah).clamp(_minMl, _maxMl);
+    final dibulatkan = ((_mlMentah / _langkah).round() * _langkah).clamp(
+      _minMl,
+      _maxMl,
+    );
     if (dibulatkan != _ml) {
       HapticFeedback.selectionClick();
       setState(() => _ml = dibulatkan);
@@ -175,7 +177,10 @@ class _GelasPainter extends CustomPainter {
       ..lineTo(w, h)
       ..lineTo(0, h)
       ..close();
-    canvas.drawPath(cairan, Paint()..color = warnaCairan.withValues(alpha: 0.85));
+    canvas.drawPath(
+      cairan,
+      Paint()..color = warnaCairan.withValues(alpha: 0.85),
+    );
     canvas.restore();
 
     // Garis skala tiap 250 ml

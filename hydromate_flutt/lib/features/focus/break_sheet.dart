@@ -47,9 +47,9 @@ class _BreakSheetState extends State<BreakSheet> {
   Future<void> _catatMinum() async {
     final ml = await showDrinkVolumeSheet(context, 'Air putih');
     if (ml == null || !mounted) return;
-    context
-        .read<AppState>()
-        .addLog(DrinkLog(jenis: 'Air putih', ml: ml, waktu: DateTime.now()));
+    context.read<AppState>().addLog(
+      DrinkLog(jenis: 'Air putih', ml: ml, waktu: DateTime.now()),
+    );
     setState(() => _minum = true);
   }
 
@@ -67,8 +67,9 @@ class _BreakSheetState extends State<BreakSheet> {
           children: [
             Text(
               'Waktunya istirahat!',
-              style: textTheme.headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             // Sisa waktu istirahat ikut berjalan di dalam sheet

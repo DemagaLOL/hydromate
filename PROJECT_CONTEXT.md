@@ -9,7 +9,10 @@ Dibuat untuk hackathon 1 hari (13 jam). Target: demo mulus di HP Android, bukan 
 - Notifikasi: flutter_local_notifications + timezone (lokal saja)
 - Peta: flutter_map + latlong2 + tile OpenStreetMap (tanpa API key)
 - Cuaca: Open-Meteo via package http (tanpa API key)
-- Tanpa backend dan tanpa database server. Semua data lokal di HP.
+- Database opsional: Supabase (supabase_flutter) untuk leaderboard & titik refill.
+  Skema di hydromate_flutt/supabase/schema.sql. URL/key lewat --dart-define
+  (SUPABASE_URL, SUPABASE_KEY); tanpa itu app tetap jalan dengan data lokal/contoh.
+  Data pribadi (profil, riwayat minum, jadwal) tetap lokal di HP.
 
 ## Aturan
 1. Jangan tambah package tanpa izin. Jangan sarankan state management lain (bukan Riverpod/Bloc/GetX).
@@ -36,4 +39,4 @@ Primary #1E6FE0, Secondary #35C9D6, Background #F5F9FF, Teks #12263F
 3. Focus Session: Pomodoro 25/5 menit, saat jeda muncul prompt minum
 4. Streak + Leaderboard: streak lokal, leaderboard data dummy
 5. Refill Map: flutter_map, titik refill hardcode area kampus Unsoed Purwokerto
-Target harian = berat x 33 ml + bonus aktivitas (sedang +300, tinggi +600) + bonus suhu >=30C (+300)
+Target harian = berat x 33 ml (x 30 ml bila usia > 55) + bonus aktivitas (sedang +300, tinggi +600) + bonus suhu >=30C (+300)
