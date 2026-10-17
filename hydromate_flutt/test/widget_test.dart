@@ -1,30 +1,128 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:hydromate_flutt/main.dart';
+import 'package:hydromate_flutt/core/models.dart';
+import 'package:hydromate_flutt/features/focus/pomodoro_timer.dart';
+import 'package:hydromate_flutt/features/tracker/drink_volume_sheet.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('PomodoroTimer: fokus selesai -> istirahat -> fokus menunggu', () {
+    var sekarang = DateTime(2026, 1, 1, 9);
+    final fase = <FasePomodoro>[];
+    final timer = PomodoroTimer(
+      durasiFokus: const Duration(seconds: 25),
+      durasiIstirahat: const Duration(seconds: 5),
+      jam: () => sekarang,
+    )..onFaseBerubah = fase.add;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    timer.mulai();
+    sekarang = sekarang.add(const Duration(seconds: 10));
+    timer.tick();
+    expect(formatSisa(timer.sisa), '00:15');
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Jeda tidak mengurangi waktu
+    timer.jeda();
+    sekarang = sekarang.add(const Duration(minutes: 3));
+    timer.mulai();
+    timer.tick();
+    expect(formatSisa(timer.sisa), '00:15');
+
+    // Fokus habis -> istirahat otomatis berjalan
+    sekarang = sekarang.add(const Duration(seconds: 15));
+    timer.tick();
+    expect(timer.fase, FasePomodoro.istirahat);
+    expect(timer.sesiSelesai, 1);
+    expect(timer.berjalan, isTrue);
+
+    // Istirahat habis -> fokus, berhenti menunggu Mulai
+    sekarang = sekarang.add(const Duration(seconds: 5));
+    timer.tick();
+    expect(timer.fase, FasePomodoro.fokus);
+    expect(timer.berjalan, isFalse);
+    expect(fase, [FasePomodoro.istirahat, FasePomodoro.fokus]);
+
+    // Melewati sesi fokus tidak menambah hitungan
+    timer.lewati();
+    expect(timer.sesiSelesai, 1);
+    timer.dispose();
+  });
+
+  test('hitungStreak menghitung hari berturut-turut', () {
+    final hariIni = DateTime(2026, 3, 10, 12);
+    DrinkLog air(int hariLalu, int ml) => DrinkLog(
+          jenis: 'Air putih',
+          ml: ml,
+          waktu: hariIni.subtract(Duration(days: hariLalu)),
+        );
+
+    // Kemarin & 2 hari lalu tercapai, 3 hari lalu tidak, hari ini belum
+    final logs = [air(1, 2000), air(2, 2100), air(3, 500), air(0, 300)];
+    expect(hitungStreak(logs, 2000, sekarang: hariIni), 2);
+
+    // Hari ini juga tercapai -> 3
+    logs.add(air(0, 1800));
+    expect(hitungStreak(logs, 2000, sekarang: hariIni), 3);
+
+    // Kopi dihitung dengan koefisien: 2000 x 0.8 = 1600 < 2000
+    final kopi = [
+      DrinkLog(jenis: 'Kopi', ml: 2000, waktu: hariIni),
+    ];
+    expect(hitungStreak(kopi, 2000, sekarang: hariIni), 0);
+  });
+
+  testWidgets('Drag gelas ke atas menambah volume lalu Simpan', (tester) async {
+    int? hasil;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async =>
+                hasil = await showDrinkVolumeSheet(context, 'Kopi'),
+            child: const Text('buka'),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('buka'));
+    await tester.pumpAndSettle();
+    expect(find.text('250 ml'), findsWidgets);
+
+    // Pilihan cepat 500 ml, lalu drag ke atas 48 px (= +200 ml)
+    await tester.tap(find.text('500 ml'));
     await tester.pump();
+    await tester.drag(find.byKey(const Key('gelas')), const Offset(0, -48));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.tap(find.text('Simpan'));
+    await tester.pumpAndSettle();
+    expect(hasil, 700);
+  });
+
+  // Pastikan toJson/fromJson model bolak-balik tanpa kehilangan data
+  test('DrinkLog JSON bolak-balik dan air efektif', () {
+    final log = DrinkLog(jenis: 'Kopi', ml: 200, waktu: DateTime(2026, 1, 1, 8));
+    final hasil = DrinkLog.fromJson(log.toJson());
+    expect(hasil.jenis, 'Kopi');
+    expect(hasil.ml, 200);
+    expect(hasil.waktu, log.waktu);
+    expect(hasil.mlEfektif, 160);
+  });
+
+  test('hitungTargetHarian sesuai rumus', () {
+    const p = UserProfile(beratKg: 60, usia: 20, aktivitas: Aktivitas.sedang);
+    expect(hitungTargetHarian(p), 2280);
+    expect(hitungTargetHarian(p, suhuC: 31), 2580);
+    expect(hitungTargetHarian(p, suhuC: 29), 2280);
+  });
+
+  test('UserProfile dan ClassSchedule JSON bolak-balik', () {
+    const p = UserProfile(beratKg: 60, usia: 20, aktivitas: Aktivitas.sedang);
+    final p2 = UserProfile.fromJson(p.toJson());
+    expect(p2.beratKg, 60);
+    expect(p2.aktivitas, Aktivitas.sedang);
+
+    const j = ClassSchedule(hari: 1, jamMulai: 420, jamSelesai: 520);
+    final j2 = ClassSchedule.fromJson(j.toJson());
+    expect(j2.hari, 1);
+    expect(j2.jamSelesai, 520);
   });
 }
